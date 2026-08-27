@@ -1,8 +1,11 @@
 const db = require('../config/db')
 
 exports.postTodo = (req, res) => {
-    const { title } = req.body;
-    db.query('INSERT INTO todos (title) VALUES (?)', [title], (err, result) => {
+    const { title, datetodo } = req.body;
+    
+    const today = datetodo || new Date().toISOString().slice(0, 10);
+
+    db.query('INSERT INTO todos (title, datetodo) VALUES (?, ?)', [title, today], (err, result) => {
         if (err) {
             console.log('MYSQL ERROR:', err)
             return res.status(500).json({
@@ -12,17 +15,17 @@ exports.postTodo = (req, res) => {
         res.json(result)
     })
 }
-exports.getTodo = (req, res) => {
-    db.query('SELECT * FROM todos', (err, result) => {
-        if (err) {
-            console.log('MYSQL ERROR:', err)
-            return res.status(500).json({
-                message: 'Database error'
-            })
-        }
-        res.json(result);
-    })
-}
+// exports.getTodo = (req, res) => {
+//     db.query('SELECT * FROM todos', (err, result) => {
+//         if (err) {
+//             console.log('MYSQL ERROR:', err)
+//             return res.status(500).json({
+//                 message: 'Database error'
+//             })
+//         }
+//         res.json(result);
+//     })
+// }
 
 exports.putTodo = (req, res) => {
     const { id } = req.params;
@@ -74,4 +77,24 @@ exports.toggleTodo = (req, res) => {
             res.json(result)
         }
     )
+}
+
+exports.getTodo = (req, res) => {
+    const { start, end, date } = req.query;
+
+    let sql = 'SELECT * FROM todos';
+    let params = [];
+
+    if (date) {
+        sql += ' WHERE datetodo = ?';
+        params.push(date);
+    } else if (start && end) {
+        sql += ' WHERE datetodo BETWEEN ? AND ?';
+        params.push(start, end);
+    }
+
+    db.query(sql, params, (err, result) => {
+        if (err) return res.status(500).json({ message: 'Database error' });
+        res.json(result);
+    })
 }
