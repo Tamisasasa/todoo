@@ -5,7 +5,7 @@ const db = mysql.createConnection({
     user: 'root',
     password: '1234',
     database: 'todoo',
-    dateStrings: true
+    dateStrings: true  
 })
 
 db.connect((err) => {
@@ -14,4 +14,4 @@ db.connect((err) => {
     }
 })
 
-module.exports = db ;
+module.exports = db

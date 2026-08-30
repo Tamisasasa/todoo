@@ -2,15 +2,12 @@ const db = require('../config/db')
 
 exports.postTodo = (req, res) => {
     const { title, datetodo } = req.body;
-    
     const today = datetodo || new Date().toISOString().slice(0, 10);
 
     db.query('INSERT INTO todos (title, datetodo) VALUES (?, ?)', [title, today], (err, result) => {
         if (err) {
             console.log('MYSQL ERROR:', err)
-            return res.status(500).json({
-                message: 'Database error'
-            })
+            return res.status(500).json({ message: 'Database error' })
         }
         res.json(result)
     })
@@ -23,9 +20,7 @@ exports.putTodo = (req, res) => {
     db.query('UPDATE todos SET title = ? WHERE id = ?', [title, id], (err, result) => {
         if (err) {
             console.log('MYSQL ERROR:', err)
-            return res.status(500).json({
-                message: 'Database error'
-            })
+            return res.status(500).json({ message: 'Database error' })
         }
         res.json(result);
     })
@@ -36,53 +31,46 @@ exports.deleteTodo = (req, res) => {
     db.query('DELETE FROM todos WHERE id = ?', [id], (err, result) => {
         if (err) {
             console.log('MYSQL ERROR:', err)
-            return res.status(500).json({
-                message: 'Database error'
-            })
+            return res.status(500).json({ message: 'Database error' })
         }
-        res.json({
-            message: 'Todo deleted successfully'
-        });
+        res.json({ message: 'Todo deleted successfully' });
     })
 }
 
 exports.toggleTodo = (req, res) => {
     const { id } = req.params;
     const { completed } = req.body
-    db.query(
-        'UPDATE todos SET completed = ? WHERE id = ?',
-        [completed, id],
-        (err, result) => {
-            if (err) {
-                console.log('MYSQL ERROR:', err)
-                return res.status(500).json({
-                    message: 'Database error'
-                })
-            }
-            res.json(result)
+    db.query('UPDATE todos SET completed = ? WHERE id = ?', [completed, id], (err, result) => {
+        if (err) {
+            console.log('MYSQL ERROR:', err)
+            return res.status(500).json({ message: 'Database error' })
         }
-    )
+        res.json(result)
+    })
 }
 
 exports.getTodo = (req, res) => {
-    const { startDate, endDate, date, start, end } = req.query;
+    const { start, end, date } = req.query;
 
-    const queryStart = startDate || start;
-    const queryEnd = endDate || end;
-
-    let sql = 'SELECT id, title, completed, DATE_FORMAT(datetodo, "%Y-%m-%d") AS datetodo FROM todos';
+    let sql = 'SELECT * FROM todos';
     let params = [];
 
     if (date) {
         sql += ' WHERE datetodo = ?';
         params.push(date);
-    } else if (queryStart && queryEnd) {
+    } else if (start && end) {
         sql += ' WHERE datetodo BETWEEN ? AND ?';
-        params.push(queryStart, queryEnd);
+        params.push(start, end);
     }
 
+    // FIX: log ไว้ debug ว่า query จริงๆ ที่ยิงไปคืออะไร กับ query param ที่รับมาคืออะไร
+    console.log('GET /todos query params:', req.query, '| SQL:', sql, params)
+
     db.query(sql, params, (err, result) => {
-        if (err) return res.status(500).json({ message: 'Database error' });
+        if (err) {
+            console.log('MYSQL ERROR:', err)
+            return res.status(500).json({ message: 'Database error' })
+        }
         res.json(result);
     })
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Plus, Trash2, Pencil } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
-import { format, parseISO } from 'date-fns'
+import { format } from 'date-fns'
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 const Daily = () => {
@@ -15,10 +15,12 @@ const Daily = () => {
     const getTodo = async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/api/todos?date=${dateParam}`)
-            console.log(response.data)
             setTodos(response.data)
         } catch (error) {
             console.error(error)
+            setTodos([])   // FIX: เดิมถ้า request ล้มเหลว (เช่น API_BASE_URL ผิด/ต่อ backend ไม่ได้)
+                            // todos state จะค้างค่าเก่าไว้ ทำให้ทุกวันที่ดูเหมือนโชว์ todo ชุดเดิม
+                            // ตอนนี้ error แล้วจะเคลียร์รายการทิ้งให้เห็นชัดว่าโหลดไม่สำเร็จ
         }
     }
 
@@ -72,7 +74,7 @@ const Daily = () => {
             <div className='bg-[#ffffff] p-6 rounded-xl shadow-md w-full max-w-md border border-black'>
                 <h1 className='text-2xl font-bold text-gray-800 mb-1 text-center'>My Todo</h1>
                 <p className='text-xs text-gray-400 text-center mb-4'>
-                    {format(parseISO(dateParam), 'EEEE d MMMM yyyy')}
+                    {format(new Date(dateParam), 'EEEE d MMMM yyyy')}
                 </p>
 
                 <div className='flex gap-2 mb-4'>

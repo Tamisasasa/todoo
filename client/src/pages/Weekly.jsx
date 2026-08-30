@@ -23,6 +23,7 @@ const Weekly = () => {
             setTodos(response.data)
         } catch (error) {
             console.error(error)
+            setTodos([])   // FIX: เหมือนกับ Daily.jsx — เคลียร์ state เมื่อ request พัง แทนที่จะค้างค่าเก่า
         }
     }
 
@@ -64,13 +65,16 @@ const Weekly = () => {
 
                         const dayTasks = todos.filter((item) => {
                             if (!item.datetodo) return false
-                            const itemDateStr = typeof item.datetodo === 'string' ? item.datetodo.split('T')[0] : ''
+                            const itemDateStr = item.datetodo.split('T')[0]
+                            // FIX: ตอนนี้ item.datetodo เป็น string ดิบแล้ว (เพราะ dateStrings: true ใน db.js)
+                            // เช่น "2026-08-31" ไม่มี "T" ก็ยังใช้ split('T')[0] ได้ปลอดภัย ไม่กระทบ
+                            // และที่สำคัญคือไม่มีการแปลงผ่าน JS Date/timezone อีกต่อไป จึงไม่เลื่อนวัน
                             return itemDateStr === dayFormatted
                         })
 
                         return (
-                            <div 
-                                key={day.toString()} 
+                            <div
+                                key={day.toString()}
                                 onClick={() => handleCardClick(day)}
                                 className='bg-white border-2 border-black rounded-none p-4 w-full max-w-[220px] min-h-[220px] flex flex-col shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer hover:bg-gray-50 transition'
                             >
@@ -83,8 +87,8 @@ const Weekly = () => {
 
                                 <div className='space-y-2 flex-1'>
                                     {dayTasks.map((item) => (
-                                        <div 
-                                            key={item.id} 
+                                        <div
+                                            key={item.id}
                                             className='flex items-center gap-2'
                                             onClick={(e) => e.stopPropagation()}
                                         >
