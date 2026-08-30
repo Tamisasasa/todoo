@@ -3,7 +3,8 @@ import axios from 'axios'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { startOfWeek, endOfWeek, addDays, format } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://gracious-liberation-production.up.railway.app'
 
 const Weekly = () => {
     const navigate = useNavigate()
@@ -23,7 +24,7 @@ const Weekly = () => {
             setTodos(response.data)
         } catch (error) {
             console.error(error)
-            setTodos([])   // FIX: เหมือนกับ Daily.jsx — เคลียร์ state เมื่อ request พัง แทนที่จะค้างค่าเก่า
+            setTodos([])
         }
     }
 
@@ -66,9 +67,6 @@ const Weekly = () => {
                         const dayTasks = todos.filter((item) => {
                             if (!item.datetodo) return false
                             const itemDateStr = item.datetodo.split('T')[0]
-                            // FIX: ตอนนี้ item.datetodo เป็น string ดิบแล้ว (เพราะ dateStrings: true ใน db.js)
-                            // เช่น "2026-08-31" ไม่มี "T" ก็ยังใช้ split('T')[0] ได้ปลอดภัย ไม่กระทบ
-                            // และที่สำคัญคือไม่มีการแปลงผ่าน JS Date/timezone อีกต่อไป จึงไม่เลื่อนวัน
                             return itemDateStr === dayFormatted
                         })
 

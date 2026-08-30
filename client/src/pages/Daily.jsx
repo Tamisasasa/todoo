@@ -3,7 +3,8 @@ import axios from 'axios'
 import { Plus, Trash2, Pencil } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { format } from 'date-fns'
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://gracious-liberation-production.up.railway.app'
 
 const Daily = () => {
     const [searchParams] = useSearchParams()
@@ -18,9 +19,7 @@ const Daily = () => {
             setTodos(response.data)
         } catch (error) {
             console.error(error)
-            setTodos([])   // FIX: เดิมถ้า request ล้มเหลว (เช่น API_BASE_URL ผิด/ต่อ backend ไม่ได้)
-                            // todos state จะค้างค่าเก่าไว้ ทำให้ทุกวันที่ดูเหมือนโชว์ todo ชุดเดิม
-                            // ตอนนี้ error แล้วจะเคลียร์รายการทิ้งให้เห็นชัดว่าโหลดไม่สำเร็จ
+            setTodos([])
         }
     }
 
