@@ -64,7 +64,7 @@ const Weekly = () => {
 
                         const dayTasks = todos.filter((item) => {
                             if (!item.datetodo) return false
-                            const itemDateStr = item.datetodo.split('T')[0] 
+                            const itemDateStr = typeof item.datetodo === 'string' ? item.datetodo.split('T')[0] : ''
                             return itemDateStr === dayFormatted
                         })
 

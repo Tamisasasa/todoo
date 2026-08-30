@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Plus, Trash2, Pencil } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 const Daily = () => {
@@ -72,7 +72,7 @@ const Daily = () => {
             <div className='bg-[#ffffff] p-6 rounded-xl shadow-md w-full max-w-md border border-black'>
                 <h1 className='text-2xl font-bold text-gray-800 mb-1 text-center'>My Todo</h1>
                 <p className='text-xs text-gray-400 text-center mb-4'>
-                    {format(new Date(dateParam), 'EEEE d MMMM yyyy')}
+                    {format(parseISO(dateParam), 'EEEE d MMMM yyyy')}
                 </p>
 
                 <div className='flex gap-2 mb-4'>

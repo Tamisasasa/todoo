@@ -15,17 +15,6 @@ exports.postTodo = (req, res) => {
         res.json(result)
     })
 }
-// exports.getTodo = (req, res) => {
-//     db.query('SELECT * FROM todos', (err, result) => {
-//         if (err) {
-//             console.log('MYSQL ERROR:', err)
-//             return res.status(500).json({
-//                 message: 'Database error'
-//             })
-//         }
-//         res.json(result);
-//     })
-// }
 
 exports.putTodo = (req, res) => {
     const { id } = req.params;
@@ -41,7 +30,6 @@ exports.putTodo = (req, res) => {
         res.json(result);
     })
 }
-
 
 exports.deleteTodo = (req, res) => {
     const { id } = req.params;
@@ -65,32 +53,32 @@ exports.toggleTodo = (req, res) => {
         'UPDATE todos SET completed = ? WHERE id = ?',
         [completed, id],
         (err, result) => {
-
             if (err) {
                 console.log('MYSQL ERROR:', err)
-
                 return res.status(500).json({
                     message: 'Database error'
                 })
             }
-
             res.json(result)
         }
     )
 }
 
 exports.getTodo = (req, res) => {
-    const { start, end, date } = req.query;
+    const { startDate, endDate, date, start, end } = req.query;
 
-    let sql = 'SELECT * FROM todos';
+    const queryStart = startDate || start;
+    const queryEnd = endDate || end;
+
+    let sql = 'SELECT id, title, completed, DATE_FORMAT(datetodo, "%Y-%m-%d") AS datetodo FROM todos';
     let params = [];
 
     if (date) {
         sql += ' WHERE datetodo = ?';
         params.push(date);
-    } else if (start && end) {
+    } else if (queryStart && queryEnd) {
         sql += ' WHERE datetodo BETWEEN ? AND ?';
-        params.push(start, end);
+        params.push(queryStart, queryEnd);
     }
 
     db.query(sql, params, (err, result) => {
