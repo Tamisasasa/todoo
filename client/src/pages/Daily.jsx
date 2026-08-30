@@ -1,23 +1,20 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { useEffect } from 'react'
-import { useState } from 'react'
 import { Plus, Trash2, Pencil } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { format } from 'date-fns'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 const Daily = () => {
-
     const [searchParams] = useSearchParams()
-    // ถ้า URL ไม่มี ?date= ให้ fallback เป็นวันนี้
     const dateParam = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd')
 
-    const [todos, setTodos] = useState([]);
-    const [add, setAdd] = useState('');
+    const [todos, setTodos] = useState([])
+    const [add, setAdd] = useState('')
 
     const getTodo = async () => {
         try {
-            const response = await axios.get(`http://localhost:8000/api/todos?date=${dateParam}`)
+            const response = await axios.get(`${API_BASE_URL}/api/todos?date=${dateParam}`)
             console.log(response.data)
             setTodos(response.data)
         } catch (error) {
@@ -26,11 +23,11 @@ const Daily = () => {
     }
 
     const addTodo = async () => {
-        if (!add.trim()) return;
+        if (!add.trim()) return
         try {
-            await axios.post('http://localhost:8000/api/todos', { title: add, datetodo: dateParam })
+            await axios.post(`${API_BASE_URL}/api/todos`, { title: add, datetodo: dateParam })
             setAdd('')
-            getTodo();
+            getTodo()
         } catch (err) {
             console.error(err)
         }
@@ -38,10 +35,10 @@ const Daily = () => {
 
     const editTodo = async (id, currentTitle) => {
         const newTodo = prompt('Edit your todo:', currentTitle)
-        if (!newTodo || !newTodo.trim()) return;
+        if (!newTodo || !newTodo.trim()) return
         try {
-            await axios.put(`http://localhost:8000/api/todos/${id}`, { title: newTodo })
-            getTodo();
+            await axios.put(`${API_BASE_URL}/api/todos/${id}`, { title: newTodo })
+            getTodo()
         } catch (err) {
             console.error(err)
         }
@@ -49,29 +46,26 @@ const Daily = () => {
 
     const deleteTodo = async (id) => {
         try {
-            await axios.delete(`http://localhost:8000/api/todos/${id}`)
-            getTodo();
+            await axios.delete(`${API_BASE_URL}/api/todos/${id}`)
+            getTodo()
         } catch (err) {
             console.error(err)
         }
     }
 
-    // ดึงข้อมูลใหม่ทุกครั้งที่ dateParam เปลี่ยน (เช่น กดลูกศรเปลี่ยนวัน หรือเข้าจาก Weekly)
     useEffect(() => {
         getTodo()
     }, [dateParam])
 
     const toggleTodo = async (currentStatus, id) => {
         try {
-            const newStatus = currentStatus ? 0 : 1;
-            await axios.put(`http://localhost:8000/api/todos/${id}/toggle`, { completed: newStatus })
-            getTodo();
+            const newStatus = currentStatus ? 0 : 1
+            await axios.put(`${API_BASE_URL}/api/todos/${id}/toggle`, { completed: newStatus })
+            getTodo()
         } catch (err) {
             console.error(err)
         }
     }
-
-    // FFFAE6
 
     return (
         <div className='min-h-screen bg-[#FFFAE6] flex items-center justify-center p-4'>
@@ -91,7 +85,7 @@ const Daily = () => {
                     />
                     <button
                         onClick={addTodo}
-                        className='bg-black  text-[#FFFAE6] px-4 py-2 rounded-lg flex items-center gap-1 font-medium transition'
+                        className='bg-black text-[#FFFAE6] px-4 py-2 rounded-lg flex items-center gap-1 font-medium transition'
                     >
                         <Plus size={18} /> add
                     </button>
