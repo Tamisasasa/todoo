@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { startOfWeek, endOfWeek, addDays, format, isSameDay } from 'date-fns'
+import { startOfWeek, endOfWeek, addDays, format } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
 
 const Weekly = () => {
@@ -13,10 +13,12 @@ const Weekly = () => {
     const endDate = endOfWeek(currentDate, { weekStartsOn: 1 })
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(startDate, i))
 
+    // แปลงวันที่ให้อยู่ในรูปแบบ YYYY-MM-DD เพื่อใช้เปรียบเทียบให้แม่นยำ
+    const startStr = format(startDate, 'yyyy-MM-dd')
+    const endStr = format(endDate, 'yyyy-MM-dd')
+
     const getTodos = async () => {
         try {
-            const startStr = format(startDate, 'yyyy-MM-dd')
-            const endStr = format(endDate, 'yyyy-MM-dd')
             const response = await axios.get(`http://localhost:8000/api/todos?startDate=${startStr}&endDate=${endStr}`)
             setTodos(response.data)
         } catch (error) {
@@ -24,9 +26,10 @@ const Weekly = () => {
         }
     }
 
+    // ดึงข้อมูลใหม่ทุกครั้งที่ startStr หรือ endStr เปลี่ยน
     useEffect(() => {
         getTodos()
-    }, [currentDate])
+    }, [startStr, endStr])
 
     const toggleTodo = async (currentStatus, id) => {
         try {
@@ -58,9 +61,15 @@ const Weekly = () => {
 
                 <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full justify-items-center'>
                     {weekDays.map((day) => {
-                        const dayTasks = todos.filter((item) =>
-                            item.datetodo && isSameDay(new Date(item.datetodo), day)
-                        )
+                        const dayFormatted = format(day, 'yyyy-MM-dd')
+
+                        // กรองรายการโดยเปรียบเทียบ String yyyy-MM-DD โดยตรง (ตัดปัญหาเรื่อง เวลา/Timezone)
+                        const dayTasks = todos.filter((item) => {
+                            if (!item.datetodo) return false
+                            // ตัดเอาเฉพาะส่วน YYYY-MM-DD จากข้อมูล backend
+                            const itemDateStr = item.datetodo.split('T')[0] 
+                            return itemDateStr === dayFormatted
+                        })
 
                         return (
                             <div 
