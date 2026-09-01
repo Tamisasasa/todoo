@@ -1,24 +1,17 @@
 {
-  "name": "booking-server",
-  "private": true,
+  "name": "todoo-server",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js"
   },
   "dependencies": {
-    "@clerk/express": "^1.7.82",
-    "@prisma/adapter-mariadb": "^7.9.1",
-    "@prisma/client": "^7.9.1",
-    "cloudinary": "^2.10.1",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "morgan": "^1.11.0",
-    "mysql2": "^3.24.2",
-    "prisma": "^7.9.1"
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mysql2": "^3.14.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.10"
   }
 }

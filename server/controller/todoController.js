@@ -1,76 +1,197 @@
 const db = require('../config/db')
 
-exports.postTodo = (req, res) => {
-    const { title, datetodo } = req.body;
-    const today = datetodo || new Date().toISOString().slice(0, 10);
 
-    db.query('INSERT INTO todos (title, datetodo) VALUES (?, ?)', [title, today], (err, result) => {
-        if (err) {
-            console.log('MYSQL ERROR:', err)
-            return res.status(500).json({ message: 'Database error' })
-        }
-        res.json(result)
-    })
-}
-
-exports.putTodo = (req, res) => {
-    const { id } = req.params;
-    const { title } = req.body;
-
-    db.query('UPDATE todos SET title = ? WHERE id = ?', [title, id], (err, result) => {
-        if (err) {
-            console.log('MYSQL ERROR:', err)
-            return res.status(500).json({ message: 'Database error' })
-        }
-        res.json(result);
-    })
-}
-
-exports.deleteTodo = (req, res) => {
-    const { id } = req.params;
-    db.query('DELETE FROM todos WHERE id = ?', [id], (err, result) => {
-        if (err) {
-            console.log('MYSQL ERROR:', err)
-            return res.status(500).json({ message: 'Database error' })
-        }
-        res.json({ message: 'Todo deleted successfully' });
-    })
-}
-
-exports.toggleTodo = (req, res) => {
-    const { id } = req.params;
-    const { completed } = req.body
-    db.query('UPDATE todos SET completed = ? WHERE id = ?', [completed, id], (err, result) => {
-        if (err) {
-            console.log('MYSQL ERROR:', err)
-            return res.status(500).json({ message: 'Database error' })
-        }
-        res.json(result)
-    })
-}
-
+// GET TODOS
 exports.getTodo = (req, res) => {
-    const { start, end, date } = req.query;
 
-    let sql = 'SELECT * FROM todos';
-    let params = [];
+    const sql = `
+        SELECT *
+        FROM todos
+        ORDER BY id DESC
+    `
 
-    if (date) {
-        sql += ' WHERE datetodo = ?';
-        params.push(date);
-    } else if (start && end) {
-        sql += ' WHERE datetodo BETWEEN ? AND ?';
-        params.push(start, end);
+    db.query(sql, (err, result) => {
+
+        if (err) {
+            console.error('MYSQL ERROR:', err)
+
+            return res.status(500).json({
+                message: 'Database error'
+            })
+        }
+
+        res.json(result)
+    })
+}
+
+
+// CREATE TODO
+exports.postTodo = (req, res) => {
+
+    const { title } = req.body
+
+    if (!title || title.trim() === '') {
+        return res.status(400).json({
+            message: 'Title is required'
+        })
     }
 
-    // FIX: log ไว้ debug ว่า query จริงๆ ที่ยิงไปคืออะไร กับ query param ที่รับมาคืออะไร
-    console.log('GET /todos query params:', req.query, '| SQL:', sql, params)
+    const sql = `
+        INSERT INTO todos (title, completed)
+        VALUES (?, false)
+    `
 
-    db.query(sql, params, (err, result) => {
+    db.query(sql, [title.trim()], (err, result) => {
+
         if (err) {
-            console.log('MYSQL ERROR:', err)
-            return res.status(500).json({ message: 'Database error' })
+            console.error('MYSQL ERROR:', err)
+
+            return res.status(500).json({
+                message: 'Database error'
+            })
         }
-        res.json(result);
+
+        res.status(201).json({
+            id: result.insertId,
+            title: title.trim(),
+            completed: false
+        })
+    })
+}
+
+
+// UPDATE TODO
+exports.putTodo = (req, res) => {
+
+    const { id } = req.params
+    const { title } = req.body
+
+    if (!title || title.trim() === '') {
+        return res.status(400).json({
+            message: 'Title is required'
+        })
+    }
+
+    const sql = `
+        UPDATE todos
+        SET title = ?
+        WHERE id = ?
+    `
+
+    db.query(
+        sql,
+        [title.trim(), id],
+        (err, result) => {
+
+            if (err) {
+                console.error('MYSQL ERROR:', err)
+
+                return res.status(500).json({
+                    message: 'Database error'
+                })
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({
+                    message: 'Todo not found'
+                })
+            }
+
+            res.json({
+                message: 'Todo updated'
+            })
+        }
+    )
+}
+
+
+// TOGGLE TODO
+exports.toggleTodo = (req, res) => {
+
+    const { id } = req.params
+
+    const sql = `
+        UPDATE todos
+        SET completed = NOT completed
+        WHERE id = ?
+    `
+
+    db.query(sql, [id], (err, result) => {
+
+        if (err) {
+            console.error('MYSQL ERROR:', err)
+
+            return res.status(500).json({
+                message: 'Database error'
+            })
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                message: 'Todo not found'
+            })
+        }
+
+        res.json({
+            message: 'Todo status changed'
+        })
+    })
+}
+
+
+// DELETE TODO
+exports.deleteTodo = (req, res) => {
+
+    const { id } = req.params
+
+    const sql = `
+        DELETE FROM todos
+        WHERE id = ?
+    `
+
+    db.query(sql, [id], (err, result) => {
+
+        if (err) {
+            console.error('MYSQL ERROR:', err)
+
+            return res.status(500).json({
+                message: 'Database error'
+            })
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                message: 'Todo not found'
+            })
+        }
+
+        res.json({
+            message: 'Todo deleted'
+        })
+    })
+}
+
+
+// DELETE COMPLETED
+exports.deleteCompleted = (req, res) => {
+
+    const sql = `
+        DELETE FROM todos
+        WHERE completed = true
+    `
+
+    db.query(sql, (err) => {
+
+        if (err) {
+            console.error('MYSQL ERROR:', err)
+
+            return res.status(500).json({
+                message: 'Database error'
+            })
+        }
+
+        res.json({
+            message: 'Completed todos deleted'
+        })
     })
 }
