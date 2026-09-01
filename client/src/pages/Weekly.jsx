@@ -3,8 +3,7 @@ import axios from 'axios'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { startOfWeek, endOfWeek, addDays, format } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://gracious-liberation-production.up.railway.app'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://gracious-liberation-production-662c.up.railway.app'
 
 const Weekly = () => {
     const navigate = useNavigate()

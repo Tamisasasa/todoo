@@ -3,8 +3,7 @@ import axios from 'axios'
 import { Plus, Trash2, Pencil } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { format } from 'date-fns'
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://gracious-liberation-production.up.railway.app'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://gracious-liberation-production-662c.up.railway.app'
 
 const Daily = () => {
     const [searchParams] = useSearchParams()

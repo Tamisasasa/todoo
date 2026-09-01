@@ -9,7 +9,13 @@ const pool = mysql.createPool({
     dateStrings: true,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000
+})
+
+pool.on('error', (err) => {
+    console.error('MySQL pool error:', err)
 })
 
 module.exports = pool
